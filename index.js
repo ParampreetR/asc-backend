@@ -3,7 +3,7 @@ let app = Fastify();
 
 /*
  * Hosting providers wants all Web Applications to bind
- * on PORT specified by them thorugh environment variable `PORT`
+ * on PORT specified by them through environment variable `PORT`
  */
 const PORT = process.env.PORT | 8080;
 
