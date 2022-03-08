@@ -5,6 +5,9 @@
   "repository": "https://github.com/ParampreetR/asc-backend.git",
   "author": "ParampreetR <raja.rai6789@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "node ./index.js"
+  },
   "dependencies": {
     "fastify": "^3.27.2",
     "sequelize": "^6.17.0",
