@@ -34,6 +34,7 @@ const quickLinks = async (sequelize) => {
       },
       info: {
         type: DataTypes.TEXT,
+        allowNull: false,
       },
       url: {
         type: DataTypes.TEXT,

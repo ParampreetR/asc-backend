@@ -39,6 +39,15 @@ app.get("/v1/getNotifications", async (req, res) => {
 });
 
 /*
+ * QuickLinks
+ */
+app.get("/v1/getQuickLinks", async (req, res) => {
+  const quickLinks = await models.quickLinks(sequelize);
+  let result = await quickLinks.findAll();
+  res.send(result);
+});
+
+/*
  * Add new notification to database
  *
  * Requires "Content-Type: application/json"
@@ -62,6 +71,30 @@ app.post("/v1/addNotification", async (req, res) => {
 });
 
 /*
+ * Add new quicklink to database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: title, url, info?
+ */
+app.post("/v1/addQuickLink", async (req, res) => {
+  if (req.body.title && req.body.url) {
+    try {
+      const quickLinks = await models.quickLinks(sequelize);
+      await quickLinks.create({
+        title: sanitizer.sanitize(req.body.title),
+        url: sanitizer.sanitize(req.body.url),
+        info: req.body.info ? sanitizer.sanitize(req.body.info) : undefined,
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
+});
+
+/*
  * Delete notification from database
  *
  * Requires "Content-Type: application/json"
@@ -72,6 +105,30 @@ app.post("/v1/delNotification", async (req, res) => {
     try {
       const notifications = await models.notifications(sequelize);
       await notifications.destroy({
+        where: {
+          id: parseInt(req.body.id),
+        },
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
+});
+
+/*
+ * Delete quicklink from database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: id
+ */
+app.post("/v1/delQuickLink", async (req, res) => {
+  if (req.body.id) {
+    try {
+      const quickLinks = await models.quickLinks(sequelize);
+      await quickLinks.destroy({
         where: {
           id: parseInt(req.body.id),
         },
