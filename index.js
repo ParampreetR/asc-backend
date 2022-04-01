@@ -2,6 +2,7 @@ const Fastify = require("fastify"); // Backend Framework
 const { Sequelize } = require("sequelize"); // Object Relational Mapper
 const path = require("path");
 const models = require("./src/models");
+const sanitizer = require("string-sanitizer");
 
 let app = Fastify();
 
@@ -28,10 +29,60 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+/*
+ * Notifications
+ */
 app.get("/v1/getNotifications", async (req, res) => {
   const notifications = await models.notifications(sequelize);
   let result = await notifications.findAll();
   res.send(result);
+});
+
+/*
+ * Add new notification to database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: title, url
+ */
+app.post("/v1/addNotification", async (req, res) => {
+  if (req.body.title && req.body.url) {
+    try {
+      const notifications = await models.notifications(sequelize);
+      await notifications.create({
+        title: sanitizer.sanitize(req.body.title),
+        url: sanitizer.sanitize(req.body.url),
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
+});
+
+/*
+ * Delete notification from database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: id
+ */
+app.post("/v1/delNotification", async (req, res) => {
+  if (req.body.id) {
+    try {
+      const notifications = await models.notifications(sequelize);
+      await notifications.destroy({
+        where: {
+          id: parseInt(req.body.id),
+        },
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
 });
 
 /*
