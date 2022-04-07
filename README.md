@@ -1,3 +1,6 @@
-# asc-backend
-hello world
-hey baby its me anonymous...
+# AS Collage backend
+
+## API Routes
+
+- Fetch all notifications
+  `/v1/getNotifications`

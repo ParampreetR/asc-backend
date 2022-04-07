@@ -71,6 +71,15 @@ app.get("/v1/getQuickLinks", async (req, res) => {
 });
 
 /*
+ * Events
+ */
+app.get("/v1/getEvents", async (req, res) => {
+  const events = await models.events(sequelize);
+  let result = await events.findAll();
+  res.send(result);
+});
+
+/*
  * Add new notification to database
  *
  * Requires "Content-Type: application/json"
@@ -104,6 +113,30 @@ app.post("/v1/addQuickLink", async (req, res) => {
     try {
       const quickLinks = await models.quickLinks(sequelize);
       await quickLinks.create({
+        title: sanitizer.sanitize(req.body.title),
+        url: sanitizer.sanitize(req.body.url),
+        info: req.body.info ? sanitizer.sanitize(req.body.info) : undefined,
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
+});
+
+/*
+ * Add new event to database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: title, url, info?
+ */
+app.post("/v1/addEvents", async (req, res) => {
+  if (req.body.title && req.body.url) {
+    try {
+      const events = await models.events(sequelize);
+      await events.create({
         title: sanitizer.sanitize(req.body.title),
         url: sanitizer.sanitize(req.body.url),
         info: req.body.info ? sanitizer.sanitize(req.body.info) : undefined,
@@ -152,6 +185,30 @@ app.post("/v1/delQuickLink", async (req, res) => {
     try {
       const quickLinks = await models.quickLinks(sequelize);
       await quickLinks.destroy({
+        where: {
+          id: parseInt(req.body.id),
+        },
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
+});
+
+/*
+ * Delete event from database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: id
+ */
+app.post("/v1/delEvent", async (req, res) => {
+  if (req.body.id) {
+    try {
+      const events = await models.events(sequelize);
+      await events.destroy({
         where: {
           id: parseInt(req.body.id),
         },
