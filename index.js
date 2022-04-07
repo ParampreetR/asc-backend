@@ -1,10 +1,33 @@
 const Fastify = require("fastify"); // Backend Framework
 const { Sequelize } = require("sequelize"); // Object Relational Mapper
 const path = require("path");
+const sqlite3 = require("sqlite3");
 const models = require("./src/models");
 const sanitizer = require("string-sanitizer");
+const fastifySession = require("@fastify/session");
+const fastifyCookie = require("fastify-cookie");
+const sqliteStoreFactory = require("express-session-sqlite").default;
 
+const SqliteStore = sqliteStoreFactory(fastifySession);
 let app = Fastify();
+
+app.register(fastifyCookie);
+app.register(fastifySession, {
+  secret: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  cookie: {
+    secure: false,
+  },
+  store: new SqliteStore({
+    // Database library to use
+    driver: sqlite3.Database,
+    // Saving sessions to "database/session.sqlite"
+    path: path.resolve(__dirname, "database/session.sqlite"),
+    // Session TTL in milliseconds
+    ttl: 500000,
+    // (optional) Session id prefix. Default is no prefix.
+    prefix: "s:",
+  }),
+});
 
 // Saving data to "./database/database.sqlite". Using SQLite
 const sequelize = new Sequelize({
@@ -26,7 +49,7 @@ const PORT = process.env.PORT | 8080;
  *  });
  */
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("AS Collage API");
 });
 
 /*
@@ -147,7 +170,7 @@ app.post("/v1/delQuickLink", async (req, res) => {
  * Note: Some Hosting providers wants developers to host
  *  Web Application at all interface, example `0.0.0.0`.
  */
-app.listen(PORT, "localhost", async (err, addr) => {
+app.listen(PORT, "0.0.0.0", async (err, addr) => {
   if (err) {
     console.log("[  -  ] Error in binding to port");
     console.err(err);
