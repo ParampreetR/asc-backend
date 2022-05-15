@@ -29,6 +29,8 @@ app.register(fastifySession, {
   }),
 });
 
+app.register(require("fastify-cors"));
+
 // Saving data to "./database/database.sqlite". Using SQLite
 const sequelize = new Sequelize({
   dialect: "sqlite",
