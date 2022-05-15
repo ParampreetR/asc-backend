@@ -23,7 +23,7 @@ app.register(fastifySession, {
     // Saving sessions to "database/session.sqlite"
     path: path.resolve(__dirname, "database/session.sqlite"),
     // Session TTL in milliseconds
-    ttl: 500000,
+    ttl: 50000,
     // (optional) Session id prefix. Default is no prefix.
     prefix: "s:",
   }),
@@ -39,7 +39,7 @@ const sequelize = new Sequelize({
  * Hosting providers wants all Web Applications to bind
  * on PORT specified by them through environment variable `PORT`
  */
-const PORT = process.env.PORT | 8080;
+const PORT = process.env.PORT || 8080;
 
 /*
  * General Structure of Request Handler
@@ -76,6 +76,15 @@ app.get("/v1/getQuickLinks", async (req, res) => {
 app.get("/v1/getEvents", async (req, res) => {
   const events = await models.events(sequelize);
   let result = await events.findAll();
+  res.send(result);
+});
+
+/*
+ * Articles
+ */
+app.get("/v1/getArticles", async (req, res) => {
+  const articles = await models.articles(sequelize);
+  let result = await articles.findAll();
   res.send(result);
 });
 
@@ -130,9 +139,33 @@ app.post("/v1/addQuickLink", async (req, res) => {
  * Add new event to database
  *
  * Requires "Content-Type: application/json"
- * Parameters: title, url, info?
+ * Parameters: id, title, info?
  */
 app.post("/v1/addEvents", async (req, res) => {
+  if (req.body.title && req.body.url) {
+    try {
+      const events = await models.events(sequelize);
+      await events.create({
+        id: sanitizer.sanitize(req.body.id),
+        title: sanitizer.sanitize(req.body.title),
+        info: req.body.info ? sanitizer.sanitize(req.body.info) : undefined,
+      });
+      res.send("OK");
+    } catch (err) {
+      res.status(500);
+    }
+  } else {
+    res.status(404);
+  }
+});
+
+/*
+ * Add new event to database
+ *
+ * Requires "Content-Type: application/json"
+ * Parameters: title, url, info?
+ */
+app.post("/v1/addArticle", async (req, res) => {
   if (req.body.title && req.body.url) {
     try {
       const events = await models.events(sequelize);
